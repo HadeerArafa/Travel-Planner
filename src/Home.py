@@ -36,6 +36,7 @@ layout.show_header()
 
 user_api_key = utils.load_api_key()
 os.environ["OPENAI_API_KEY"] = user_api_key
+openai.api_key =user_api_key
 
 st.markdown(
     """

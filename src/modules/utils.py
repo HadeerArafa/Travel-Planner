@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import streamlit as st
-import pdfplumber
 
 from modules.chatbot import Chatbot
 
