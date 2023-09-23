@@ -29,11 +29,13 @@ class LocalDataTool(BaseTool):
     args_schema: Optional[Type[BaseModel]] = LocalDataInput
 
 
-def get_Local_data(country=None):
+def get_Local_data(country=None , year="2023"):
+    
+    """Get the local events in the destination country on travelling year."""
     
     url = "https://holidays-by-api-ninjas.p.rapidapi.com/v1/holidays"
 
-    querystring = {"country":{country},"year":"2023"}
+    querystring = {"country":{country},"year":{year}}
 
     headers = {
         "X-RapidAPI-Key": "ed34063462msh7af2889df113673p13163ejsn15d3824657a3",
@@ -41,5 +43,5 @@ def get_Local_data(country=None):
     }
 
     response = requests.get(url, headers=headers, params=querystring)
-
-    print(response.json())
+    response = response.json()
+    return response[:3]
