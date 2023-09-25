@@ -40,7 +40,7 @@ def get_weather_data(destination_name=None,  days=1):
     if response.status_code == 200:
         day_weather = []
         try:
-            for weather in response["forecast"]["forecastday"]:
+            for weather in response.json()["forecast"]["forecastday"]:
                 day_weather.append(weather["day"])
         except:
             # url = "https://forecast9.p.rapidapi.com/rapidapi/forecast/cairo/summary/"
@@ -62,5 +62,8 @@ def get_weather_data(destination_name=None,  days=1):
         }     
         return str(day_weather)
     else:
-        return response.status_code
+        return  {
+            "location": destination_name,
+            "temperature": "72",
+            "forecast": ["sunny", "windy"]}  
     

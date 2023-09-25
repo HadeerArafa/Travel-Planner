@@ -131,22 +131,16 @@ class Utilities:
                         "And what is yout distination location",
                         "Greet choise , when are you planning to travel please provied the date in yyyy-mm-dd for better experiance?",
                         "how long you are ganne to stay => note : "this is trip duration after asking this question you should call the function get_weather_data to get the weather of the destination" ",
-                        "how many paople gonne travel",
+                        "how many paople gonne travel including you",
                         "Alright , what is the budget for the trip?",
                         "transporter type => car , bus ,...",
                         "activit types and interests (beach, mountains, culture, adventure, etc.)",
                         "cuisine type",
                         "anything alse you want to add a note any kind of activity or anything i should consider"]
                     please rephares them and generate as much question as you need to have all the data to plan
-                    after all the question you should generate the plan
-                    note : Format your final response using Markdown. Use headings, subheadings, bullet points, and bold to organize the information as you
-                    are required to give detials about what user should do eveyday in they trip."
-                    Generate a personalized travel itinerary for a trip to ${values.destinationCountry} with a budget of ${values.budget}. The traveler is interested in a ${values.travelStyle} vacation and enjoys ${values.interestsNew}. They are looking for ${values.accommodationType} accommodations and prefer ${values.transportationType} transportation. 
-                    The itinerary should include ${values.activityType} activities and ${values.cuisineType} dining options. 
-                    Please provide a detailed itinerary with daily recommendations for ${values.tripDuration} days, including suggested destinations, activities, and dining options. 
-                    The itinerary should be written in ${values.language}. 
-                    # Once the initial plan is presented, users should be able to ask for changes ("Add more beach days" or "Suggest a local festival"), and the model should dynamically adjust the itinerary
-                
+                    after all the question you should call the function response to generate the response
+                    
+                   
                     ''',
                 
                 },

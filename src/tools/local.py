@@ -44,4 +44,7 @@ def get_Local_data(country=None , year="2023"):
 
     response = requests.get(url, headers=headers, params=querystring)
     response = response.json()
-    return response[:3]
+    if(len(response) > 3):
+        return response[:3]
+    else :
+        return response

@@ -40,11 +40,11 @@ class HotelDataTool(BaseTool):
     args_schema: Optional[Type[BaseModel]] = HotelDataInput
 
 
-def get_Hotel_data(location=None,checkin=None,checkout=None,adults=1 ):
+def get_Hotel_data(location=None, checkin=None, checkout=None, adults=1):
 
     url = "https://airbnb13.p.rapidapi.com/search-location"
 
-    querystring = {"location":{location},"checkin":{checkin},"checkout":{checkout},"adults":{adults},"currency":"USD"}
+    querystring = {"location": {location}, "checkin": {checkin}, "checkout": {checkout}, "adults": {adults}, "currency": "USD"}
 
     headers = {
         "X-RapidAPI-Key": "ed34063462msh7af2889df113673p13163ejsn15d3824657a3",
@@ -75,9 +75,11 @@ def get_Hotel_data(location=None,checkin=None,checkout=None,adults=1 ):
         if "price" in keys:
             temp["price"] = res["price"] 
         all_totels.append(temp) 
-   
 
     if response.status_code == 200:
-        return str(all_totels)
+        if (len(all_totels)>5):
+            return str(all_totels[0:5])
+        else:
+            return str(all_totels)
     else:
         return response.status_code
