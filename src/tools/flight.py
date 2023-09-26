@@ -17,20 +17,22 @@ def get_flights(departure, destination , date, adults=1, classtype="ECONOMY"):
     querystring = {"query":f"{departure}"}
 
     headers = {
-        "X-RapidAPI-Key": "ed34063462msh7af2889df113673p13163ejsn15d3824657a3",
-        "X-RapidAPI-Host": "tripadvisor16.p.rapidapi.com"
-    }
+    'X-RapidAPI-Key': 'b911cca1fcmsh1120345a7e835a3p1818ccjsneb40da94ab77',
+    'X-RapidAPI-Host': 'tripadvisor16.p.rapidapi.com'
+  }
 
     response = requests.get(url, headers=headers, params=querystring)
     response = response.json()
+    print("responseflight" ,response )
     if response["status"] == True:
         departure_airport_key = response["data"][0]["airportCode"]
+        print("departure_airport_key" ,departure_airport_key )
         
     
     querystring = {"query":f"{destination}"}
 
     headers = {
-        "X-RapidAPI-Key": "ed34063462msh7af2889df113673p13163ejsn15d3824657a3",
+        "X-RapidAPI-Key": "b911cca1fcmsh1120345a7e835a3p1818ccjsneb40da94ab77",
         "X-RapidAPI-Host": "tripadvisor16.p.rapidapi.com"
     }
 
@@ -38,13 +40,14 @@ def get_flights(departure, destination , date, adults=1, classtype="ECONOMY"):
     response = response.json()
     if response["status"] == True:
         destination_airport_key = response["data"][0]["airportCode"]
+        print("destination_airport_key" ,destination_airport_key )
         
     url = "https://tripadvisor16.p.rapidapi.com/api/v1/flights/searchFlights"
 
     querystring = {"sourceAirportCode":f"{departure_airport_key}",
                    "destinationAirportCode":f"{destination_airport_key}",
                    "date":f"{date}",
-                   "itineraryType":"ROUND_TRIP",
+                   "itineraryType":"ONE_WAY",
                    "sortOrder":"PRICE",
                    "numAdults":f"{adults}",
                    "numSeniors":"0",
@@ -53,12 +56,13 @@ def get_flights(departure, destination , date, adults=1, classtype="ECONOMY"):
                    "currencyCode":"USD"}
 
     headers = {
-        "X-RapidAPI-Key": "ed34063462msh7af2889df113673p13163ejsn15d3824657a3",
+        "X-RapidAPI-Key": "b911cca1fcmsh1120345a7e835a3p1818ccjsneb40da94ab77",
         "X-RapidAPI-Host": "tripadvisor16.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)
     response = response.json()
+    print("final response")
     if response["status"] == True:
         for flight in response["data"]["flights"]:
             temp = {}
@@ -70,7 +74,7 @@ def get_flights(departure, destination , date, adults=1, classtype="ECONOMY"):
             purchase = flight["purchaseLinks"][0]
             temp["currency"] = purchase["currency"]
             temp["totalPrice"] = purchase["totalPrice"]
-        all_avaliable_flights.append(temp)    
+            all_avaliable_flights.append(temp)    
     
     return all_avaliable_flights        
             

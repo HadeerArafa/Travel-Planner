@@ -61,130 +61,189 @@ st.markdown(
 
 
 def final_response ():
-    msg = [
-   {
-    "role": "user",
-    "content": ''' summarize the conversation you need to extract information about the trip 
-    what you need to extract is  departure location ,destination location , destination country, travel date,
-     how long you are they ganne to stay , use travel date and stay_days to calc when they will return,
-    how many paople gonne travel, trip budget, transporter , activit types and interests ,cuisine type
-    the output should be "json" formate without any additinal context like this :
-     {
-        departure : departure location
-        destination : destination location
-        country : destination country
-        travel_date : travel date
-        travel_year : travel year date
-        stay_days : how long you are they ganne to stay
-        return_date : use travel date and stay_days to calc when they will return
-        people_to_travel : how many paople gonne travel
-        budget : trip budget
-        transporter : transporter
-        activity : activit types and interests
-        cuisine : cuisine type
-        additional : anything alse they want to add any kind of activity or anything you should consider
-     }
-    '''
-    }
-    ]
-   
-    all_msgs =  [ {"role": m["role"], "content": m["content"]} for m in st.session_state.messages] +msg
-    print("all_msg" , all_msgs)
+    if st.session_state.call_api == False:
+        print("calling api")
+        msg = [{
+        "role": "user",
+        "content": ''' summarize the conversation you need to extract information about the trip 
+        what you need to extract is  departure location ,destination location , departure country, destination country, travel date, travel year
+        how long you are they ganne to stay , use travel date and stay_days to calc when they will return,
+        how many paople gonne travel, trip budget, transporter , activit types and interests ,cuisine type
+        the output should be "json" formate without any additinal context like this :
+        {
+            departure : departure location
+            destination : destination location
+            departure_country = departure country
+            destination_country : destination country
+            travel_date : travel date
+            travel_year : travel year date
+            stay_days : how long you are they ganne to stay
+            return_date : use travel date and stay_days to calc when they will return
+            people_to_travel : how many paople gonne travel
+            budget : trip budget
+            transporter : transporter
+            activity : activit types and interests
+            cuisine : cuisine type
+            additional : anything alse they want to add any kind of activity or anything you should consider
+        }
+        '''
+        }
+        ]
     
-    response = openai.ChatCompletion.create( 
-                                                        model="gpt-3.5-turbo",
-                                                            messages=all_msgs,
-                                                            # function_call="auto",  # auto is default, but we'll be explicit
-                                                            # stream=True,    
-                                                        )
-    content = response.choices[0]["message"]["content"]
-    data_dict = json.loads(content)
-    weather = {}
-    try:
-        weather = get_weather_data(destination_name=data_dict["destination"] , days=data_dict["stay_days"])
-        print("wather" , weather)
-    except:
-        print("failed to get weather data")
-    local = {}
-    try:        
-        local = get_Local_data(country=data_dict["country"])
-        print("local" , local)
-    except:
-        print("failed to get local events")
-    
-    hotal = {}
-    try:        
-        hotal = get_Hotel_data(location=data_dict["destination"], checkin=data_dict["travel_date"], checkout=data_dict["return_date"], adults=data_dict["people_to_travel"])
-        print("hotal" , hotal)
-    except:
-        print("fialed to get hotal ")
-    
-    flight = {}
-    try:        
-        flight = get_flights(departure=data_dict["departure"], destination=data_dict["destination"] , date=data_dict["travel_date"],adults=data_dict["people_to_travel"])
-        print("flight" , flight)
-    except:
-        print("fialed to get flight")
-    
-    destination_data = {}    
-    try:        
-        destination_data = get_data(data_dict["destination"])
-        print("destination_data" , destination_data)
-    except:
-        print("fialed to get destination_data ")
+        all_msgs =  [ {"role": m["role"], "content": m["content"]} for m in st.session_state.messages] +msg
         
-    
-    if "restaurants" in destination_data.keys() :
-        restaurants = destination_data["restaurants"]        
+        response = openai.ChatCompletion.create( model="gpt-3.5-turbo",
+                                                messages=all_msgs,  
+                                                            )
+        
+        print("first response" ,response )
+        content = response.choices[0]["message"]["content"]
+        data_dict = json.loads(content)
+        print("data_dict" , data_dict)
+        weather = {}
         try:
-            res = get_restaurant_data(restaurants)   
-            destination_data["restaurants"]  = res
-            print("destination_data_restaurants" , destination_data["restaurants"])
+            weather = get_weather_data(destination_name=data_dict["destination"] , days=data_dict["stay_days"])
+            print("wather" , weather)
         except:
-            print("destination_data_restaurants" , destination_data["restaurants"])
-    
-    
-    msg = [{
-    "role": "user",
-    "content": f''' you are ai assistant and you should help user plan for they trip 
-    give the user detailed plan for each each day in they trip
-    given the user departure {data_dict["departure"]} , user destination {data_dict["destination"]}
-    travel date {data_dict["travel_date"]} , stay duration {data_dict["stay_days"]}
-    how many people are going to travel {data_dict["people_to_travel"]} , budget {data_dict["budget"]}
-    transporter they are going to use in the destination {data_dict["transporter"]}
-    activity types and interests they prefere {data_dict["activity"]}
-    cuisine type they prefer{data_dict["cuisine"]}
-    anything alse you they want to add a note any kind of activity or anything you should consider {data_dict["additional"]}
-    you should organize the trip considering they budget and the wather in the destinatio {weather}
-    and you should use flight data to give them avaliavle optional of the flights {flight} and you should choise one sutable for they budget and if there is no avliable flights tell them that
-    and you should sugest hotel for them from this data{hotal} to stay and give them all the avaliable information about the hotel specially the price and you should consider the budget then choising the hotels
-    and you should tell them if there will be any avaliable local event while they time in the trip using this data {local}
-    and there is a destination information {destination_data} use it to sugest a resturant and any activeties they can do
-    finally give them a plan for each day in the trip
-    note to always provied them with all the avaliable data and you should consider the budget for all you sugestion 
-    ------
-    Format your response using Markdown. Use headings, subheadings, bullet points, and bold to organize the information.
-    start by putting all the trip data like the budget , destination ,....
-    and then give them information about the weather , thing to do while there are in the trip, Safety & Local Guidelines for the destination
-    and you should provide essential phrases or translations in the local language of the vacation spot
-    and finaly give them a detailed plan for each day and highlight the weather and the price in an origanized way
-    only plan for the number of days they are going to stay 
-    --------
-    '''
-    }
-    ]
-    
-    response = openai.ChatCompletion.create( 
-                                                        model="gpt-3.5-turbo",
-                                                            messages=msg,
-                                                            # function_call="auto",  # auto is default, but we'll be explicit
-                                                            # stream=True,    
-                                                        )
-     
+            print("failed to get weather data")
+        local = {}
+        try:        
+            local = get_Local_data(country=data_dict["destination_country"], year=data_dict["travel_year"])
+            print("local" , local)
+        except:
+            print("failed to get local events")
+        hotal = {}
+        try:        
+            hotal = get_Hotel_data(location=data_dict["destination"], checkin=data_dict["travel_date"], checkout=data_dict["return_date"], adults=data_dict["people_to_travel"])
+            print("hotal" , hotal)
+        except:
+            print("fialed to get hotal ")   
+        flight = {}
+        try:        
+            flight = get_flights(departure=data_dict["departure_country"], destination=data_dict["destination_country"] , date=data_dict["travel_date"],adults=data_dict["people_to_travel"])
+            print("flight" , flight)
+        except:
+            print("fialed to get flight")
+        
+        destination_data = {}    
+        try:        
+            destination_data = get_data(data_dict["destination"])
+            destination_data["geos"] = []
+            destination_data["lodging"] = [] # no need for them
+            print("destination_data" , destination_data)
+        except:
+            print("fialed to get destination_data ")
             
-    return response  
+        
+        if "restaurants" in destination_data.keys() :
+            restaurants = destination_data["restaurants"]        
+            try:
+                res = get_restaurant_data(restaurants)   
+                destination_data["restaurants"]  = res
+                print("destination_data_restaurants" , destination_data["restaurants"])
+            except:
+                print("destination_data_restaurants" , destination_data["restaurants"])
+        
+        msg = [{
+        "role": "user",
+        "content": f''' you are ai assistant and you should help user plan for they trip 
+        given the user departure {data_dict["departure"]} , user destination {data_dict["destination"]}
+        travel date {data_dict["travel_date"]} , stay duration {data_dict["stay_days"]}
+        how many people are going to travel {data_dict["people_to_travel"]} , budget {data_dict["budget"]}
+        transporter they are going to use in the destination {data_dict["transporter"]}
+        activity types and interests they prefere {data_dict["activity"]}
+        cuisine type they prefer{data_dict["cuisine"]}
+        anything alse you they want to add a note any kind of activity or anything you should consider {data_dict["additional"]}
+        you should organize the trip considering they budget and the wather in the destinatio {weather}
+        and you should use flight data to give them avaliavle optional of the flights {flight} and you should choise one sutable for they budget and if there is no avliable flights tell them that
+        and you should sugest hotel for them from this data{hotal} to stay and give them all the avaliable information about the hotel specially the price and you should consider the budget while choising the hotels
+        and you should tell them all the local event while they time in the trip using this data {local}
+        and there is a destination information {destination_data} use it to sugest a resturant and any activeties they can do
+        note to always provied them with all the avaliable data like price and phone number and you should consider the budget for all you sugestion 
+        ------
+        Format your response using Markdown. Use headings, subheadings, bullet points, and bold to organize the information.
+        start by putting all the trip data like the budget , destination ,....
+        then give them information about the weather , thing to do while there are in the trip, Safety & Local Guidelines for the destination
+        and you should provide essential phrases or translations in the local language of the vacation spot 
+        always give them the cheapest options
+        --------
+        '''
+        }
+        ]
+        
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo",
+                                                messages=msg)
+        
+        print("second response" , response) 
+        message_placeholder = st.empty()
+        full_response = ""
+        msg = str(response.choices[0]["message"]["content"]) 
+        token = re.split(r" " "| ! | , | ? ", msg)    
+        for part in token:
+            full_response += part+" "
+            time.sleep(0.02)
+            message_placeholder.markdown(full_response + "▌")
+        # message_placeholder.markdown(full_response)
+        # st.session_state.messages.append({"role": "assistant", "content": full_response})    
+        
+        
+        msg = [{
+        "role": "user",
+        "content": f''' you are ai assistant and you should help user plan for they trip
+        Format your final response using Markdown. Use headings, subheadings, bullet points, and bold to organize the information as you
+        are required to give detials about what user should do eveyday in they trip."
+        Generate a personalized travel itinerary for a trip 
+        given the user departure {data_dict["departure"]} , user destination {data_dict["destination"]}
+        travel date {data_dict["travel_date"]} , stay duration {data_dict["stay_days"]}
+        how many people are going to travel {data_dict["people_to_travel"]} , budget {data_dict["budget"]}
+        transporter they are going to use in the destination {data_dict["transporter"]}
+        activity types and interests they prefere {data_dict["activity"]}
+        cuisine type they prefer{data_dict["cuisine"]}
+        anything alse you they want to add a note any kind of activity or anything you should consider {data_dict["additional"]}
+        Once the initial plan is presented, users should be able to ask for changes ("Add more beach days" or "Suggest a local festival"), and the model should dynamically adjust the itinerary
+        plan the trip using data from {full_response}
+        '''
+        }
+        ]
+        
+        response = openai.ChatCompletion.create( 
+                                                            model="gpt-3.5-turbo",
+                                                                messages=msg,
+                                                            )
+        
+        msg = str(response.choices[0]["message"]["content"]) 
+        token = re.split(r" " "| ! | , | ? ", msg)    
+        for part in token:
+            full_response += part+" "
+            time.sleep(0.02)
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})  
+        
+        print("third response" , response) 
+        st.session_state.call_api = True            
+        return response  
 
-
+    else:
+        print("now i am here" )
+        all_msgs = Utilities.basic_msg +[ {"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+        response = openai.ChatCompletion.create( 
+                                                model="gpt-3.5-turbo",
+                                                messages=all_msgs)
+        
+        message_placeholder = st.empty()
+        full_response = ""
+        msg = str(response.choices[0]["message"]["content"]) 
+        token = re.split(r" " "| ! | , | ? ", msg)    
+        for part in token:
+            full_response += part+" "
+            time.sleep(0.02)
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response}) 
+        
+        return response                                               
+        
 functions = [
         {
             "name": "final_response",
@@ -205,6 +264,7 @@ functions = [
         
     ]
 
+print("msg:::::::::::",st.session_state.messages)
 if not user_api_key:
     layout.show_api_key_missing()
 
@@ -218,6 +278,7 @@ else:
              "role":"assistant",
                 "content" :"I am WanderlustAI Inc AI assistant and i'm gonne help you plan for your trip can i start by getting your name"
         }]
+        st.session_state.call_api = False
     
     
     for idx, message_ in enumerate(st.session_state.messages):
@@ -244,7 +305,7 @@ else:
                                                             function_call="auto",  # auto is default, but we'll be explicit
                                                             # stream=True,    
                                                         )
-            print("response" ,response)
+            print("responseeeeeeeeeee" , response)
             if "function_call" in response["choices"][0]["message"].keys():
                 available_functions = {
                     "final_response": final_response,
@@ -255,20 +316,29 @@ else:
                     response = fuction_to_call(
                         # messages=function_args.get("messages"),
                     )
-                    print("function response" , response)
                 else :
                     response = openai.ChatCompletion.create( 
                                                         model="gpt-3.5-turbo",
                                                             messages=all_msgs,
-                                                        )    
-                
-            msg = str(response.choices[0]["message"]["content"]) 
-            token = re.split(r" " "| ! | , | ? ", msg)    
-            for part in token:
-                full_response += part+" "
-                time.sleep(0.02)
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
+                                                        )   
+                    msg = str(response.choices[0]["message"]["content"]) 
+                    token = re.split(r" " "| ! | , | ? ", msg)    
+                    for part in token:
+                        full_response += part+" "
+                        time.sleep(0.02)
+                        message_placeholder.markdown(full_response + "▌")
+                    message_placeholder.markdown(full_response)
+            
+                    st.session_state.messages.append({"role": "assistant", "content": full_response}) 
+                 
+            else :    
+                msg = str(response.choices[0]["message"]["content"]) 
+                token = re.split(r" " "| ! | , | ? ", msg)    
+                for part in token:
+                    full_response += part+" "
+                    time.sleep(0.02)
+                    message_placeholder.markdown(full_response + "▌")
+                message_placeholder.markdown(full_response)
            
-        st.session_state.messages.append({"role": "assistant", "content": full_response})    
+                st.session_state.messages.append({"role": "assistant", "content": full_response})    
     

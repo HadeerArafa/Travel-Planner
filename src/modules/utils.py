@@ -133,7 +133,7 @@ class Utilities:
                         "how long you are ganne to stay => note : "this is trip duration after asking this question you should call the function get_weather_data to get the weather of the destination" ",
                         "how many paople gonne travel including you",
                         "Alright , what is the budget for the trip?",
-                        "transporter type => car , bus ,...",
+                        "transporter type you prefere to use in the trip=> car , bus ,...",
                         "activit types and interests (beach, mountains, culture, adventure, etc.)",
                         "cuisine type",
                         "anything alse you want to add a note any kind of activity or anything i should consider"]
