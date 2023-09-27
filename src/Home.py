@@ -95,6 +95,16 @@ def final_response ():
                                                 messages=all_msgs,  
                                                             )
         
+        message_placeholder = st.empty()
+        full_response = ""
+        wait_msg = " I'm cooking up a personalized trip plan for you right now. Stay tuned for the delicious results!" 
+        token = re.split(r" " "| ! | , | ? ", wait_msg)    
+        for part in token:
+            full_response += part+" "
+            time.sleep(0.02)
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+        
         print("first response" ,response )
         content = response.choices[0]["message"]["content"]
         data_dict = json.loads(content)
@@ -187,9 +197,10 @@ def final_response ():
         "role": "user",
         "content": f''' you are ai assistant and you should help user plan for they trip
         Format your final response using Markdown. Use headings, subheadings, bullet points, and bold to organize the information as you
-        are required to give detials about what user should do eveyday in they trip."
+        are required to give detials about what user should do eveyday in they trip. your output should be like day1 .... , day2 ...."
         Generate a personalized travel itinerary for a trip 
-        given the user departure {data_dict["departure"]} , user destination {data_dict["destination"]}
+        given the weather data, hotel options local envents  ,resturant and thing to do from {response.choices[0]["message"]["content"]}
+        you also given the user departure {data_dict["departure"]} , user destination {data_dict["destination"]}
         travel date {data_dict["travel_date"]} , stay duration {data_dict["stay_days"]}
         how many people are going to travel {data_dict["people_to_travel"]} , budget {data_dict["budget"]}
         transporter they are going to use in the destination {data_dict["transporter"]}
@@ -197,7 +208,7 @@ def final_response ():
         cuisine type they prefer{data_dict["cuisine"]}
         anything alse you they want to add a note any kind of activity or anything you should consider {data_dict["additional"]}
         Once the initial plan is presented, users should be able to ask for changes ("Add more beach days" or "Suggest a local festival"), and the model should dynamically adjust the itinerary
-        plan the trip using data from {response.choices[0]["message"]["content"]}
+        give the user a detailed plan for each day what should he do and where should he go for each day in the trip dived each day to moring afternoon and eveing
         '''
         }
         ]

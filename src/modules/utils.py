@@ -67,9 +67,7 @@ class Utilities:
                         "cuisine type",
                         "anything alse you want to add a note any kind of activity or anything i should consider"]
                     please rephares them and generate as much question as you need to have all the data to plan
-                    after all the question you should call the function response to generate the response
-                    
-                   
+                    you should ask all the question and after all the question you should call the function response to generate the response
                     ''',
                 
                 },
