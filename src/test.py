@@ -25,7 +25,7 @@ if len(msgs.messages) == 0:
     msgs.add_ai_message("I am WanderlustAI Inc AI assistant and i'm gonne help you plan for your trip can i start by getting your name?")
                 
     
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = ""
 
 st.markdown(
     """

@@ -18,6 +18,7 @@ from serpapi import GoogleSearch
 from tools.flight import get_flights
 from tools.destenation_info import get_data
 from tools.restaurant import get_restaurant_data
+
 def reload_module(module_name):
     """For update changes
     made to modules in localhost (press r)"""
@@ -56,8 +57,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-
 
 
 def final_response ():
@@ -108,7 +107,7 @@ def final_response ():
             print("failed to get weather data")
         local = {}
         try:        
-            local = get_Local_data(country=data_dict["destination_country"], year=data_dict["travel_year"])
+            local = get_Local_data(country=data_dict["destination_country"], year=data_dict["travel_year"], travel_date=data_dict["travel_date"],leave_date=data_dict["return_date"])
             print("local" , local)
         except:
             print("failed to get local events")
@@ -155,17 +154,16 @@ def final_response ():
         cuisine type they prefer{data_dict["cuisine"]}
         anything alse you they want to add a note any kind of activity or anything you should consider {data_dict["additional"]}
         you should organize the trip considering they budget and the wather in the destinatio {weather}
-        and you should use flight data to give them avaliavle optional of the flights {flight} and you should choise one sutable for they budget and if there is no avliable flights tell them that
+        and you should use flight data to give them avaliavle optional of the flights {flight} and if there is no avliable flights tell them that
         and you should sugest hotel for them from this data{hotal} to stay and give them all the avaliable information about the hotel specially the price and you should consider the budget while choising the hotels
         and you should tell them all the local event while they time in the trip using this data {local}
         and there is a destination information {destination_data} use it to sugest a resturant and any activeties they can do
         note to always provied them with all the avaliable data like price and phone number and you should consider the budget for all you sugestion 
         ------
         Format your response using Markdown. Use headings, subheadings, bullet points, and bold to organize the information.
-        start by putting all the trip data like the budget , destination ,....
-        then give them information about the weather , thing to do while there are in the trip, Safety & Local Guidelines for the destination
+        give them information about the weather , thing to do while there are in the trip, Safety & Local Guidelines for the destination
         and you should provide essential phrases or translations in the local language of the vacation spot 
-        always give them the cheapest options
+        always give them the cheapest options and provied them with all the necessry detailes 
         --------
         '''
         }
@@ -175,16 +173,14 @@ def final_response ():
                                                 messages=msg)
         
         print("second response" , response) 
-        message_placeholder = st.empty()
-        full_response = ""
-        msg = str(response.choices[0]["message"]["content"]) 
-        token = re.split(r" " "| ! | , | ? ", msg)    
-        for part in token:
-            full_response += part+" "
-            time.sleep(0.02)
-            message_placeholder.markdown(full_response + "▌")
-        # message_placeholder.markdown(full_response)
-        # st.session_state.messages.append({"role": "assistant", "content": full_response})    
+        # message_placeholder = st.empty()
+        # full_response = ""
+        msg_of_response = str(response.choices[0]["message"]["content"]) 
+        # token = re.split(r" " "| ! | , | ? ", msg)    
+        # for part in token:
+        #     full_response += part+" "
+        #     time.sleep(0.02)
+        #     message_placeholder.markdown(full_response + "▌")
         
         
         msg = [{
@@ -201,7 +197,7 @@ def final_response ():
         cuisine type they prefer{data_dict["cuisine"]}
         anything alse you they want to add a note any kind of activity or anything you should consider {data_dict["additional"]}
         Once the initial plan is presented, users should be able to ask for changes ("Add more beach days" or "Suggest a local festival"), and the model should dynamically adjust the itinerary
-        plan the trip using data from {full_response}
+        plan the trip using data from {response.choices[0]["message"]["content"]}
         '''
         }
         ]
@@ -210,8 +206,9 @@ def final_response ():
                                                             model="gpt-3.5-turbo",
                                                                 messages=msg,
                                                             )
-        
-        msg = str(response.choices[0]["message"]["content"]) 
+        message_placeholder = st.empty()
+        full_response = ""
+        msg = msg_of_response + "\n " + str(response.choices[0]["message"]["content"]) 
         token = re.split(r" " "| ! | , | ? ", msg)    
         for part in token:
             full_response += part+" "
@@ -219,6 +216,7 @@ def final_response ():
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})  
+        st.session_state.init_plan = [{"role": "assistant", "content": full_response}]
         
         print("third response" , response) 
         st.session_state.call_api = True            
@@ -226,7 +224,7 @@ def final_response ():
 
     else:
         print("now i am here" )
-        all_msgs = Utilities.basic_msg +[ {"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+        all_msgs = Utilities.basic_msg + st.session_state.init_plan + [ {"role": m["role"], "content": m["content"]} for m in st.session_state.messages[-4:]]
         response = openai.ChatCompletion.create( 
                                                 model="gpt-3.5-turbo",
                                                 messages=all_msgs)
@@ -264,7 +262,6 @@ functions = [
         
     ]
 
-print("msg:::::::::::",st.session_state.messages)
 if not user_api_key:
     layout.show_api_key_missing()
 

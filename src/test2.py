@@ -8,7 +8,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 import os
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = ""
 
 llm = ChatOpenAI(temperature=0)
 

@@ -10,10 +10,11 @@ class Sidebar:
 
     @staticmethod
     def about():
-        about = st.sidebar.expander("🧠 About WanderlustAI Inc AI assistant  ")
+        about = st.sidebar.expander("🧠 About WanderlustAI Inc AI assistant  " ,expanded=True)
         sections = [
             "#### WanderlustAI is an AI chatbot with a conversational memory, designed to help users plan for they trips. 📄",
             "#### It uses large language models to provide users with natural language interactions about user data content. 🌐",
+            "#### Note i am useing free api trial so please reach me out if there were any problmes due to an expried api token"
         ]
         for section in sections:
             about.write(section)
