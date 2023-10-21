@@ -175,3 +175,6 @@ Please note that the itinerary can be adjusted based on personal preferences and
 ### Conclusion
 
 The AI Trip Planner is a powerful tool that can help users plan their trips in a personalized and budget-conscious way. It is easy to use and provides users with all of the information they need to have a successful trip.
+
+### Future Work 
+  uisng VectorDB due to the size of the data fed to the LLM prompt.
